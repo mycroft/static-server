@@ -1,0 +1,6 @@
+{
+  "name": "static-server",
+  "sdk": "go",
+  "source": "ci",
+  "engineVersion": "v0.11.4"
+}
