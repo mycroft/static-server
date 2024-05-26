@@ -1,0 +1,23 @@
+name: Publish (With Dagger)
+
+on:
+  push:
+    tags: [ "*" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Call Dagger Function
+        uses: dagger/dagger-for-github@v5
+        with:
+          version: "latest"
+          verb: call
+          args: publish --source=. --reg-address=$DOCKER_REGISTRY --reg-username=$DOCKER_USERNAME --reg-password=env:DOCKER_PASSWORD --image-name=$IMAGE_NAME --tag=$(echo ${GITHUB_REF:10})
+        env:
+          DOCKER_REGISTRY: registry.mkz.me
+          IMAGE_NAME: test-ci/static-server
+          DOCKER_USERNAME: ${{ secrets.REGISTRY_USER }}
+          DOCKER_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}

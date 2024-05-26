@@ -64,14 +64,15 @@ func (m *StaticServer) BuildTest(ctx context.Context, source *Directory) (string
 }
 
 // Run the whole pipeline: test, build & publish
-func (m *StaticServer) Publish(ctx context.Context, source *Directory, tag string) (string, error) {
+func (m *StaticServer) Publish(ctx context.Context, regUsername string, regPassword *Secret, regAddress string, imageName string, source *Directory, tag string) (string, error) {
 	_, err := m.Test(ctx, source)
 	if err != nil {
 		return "", err
 	}
 
 	address, err := m.build(source).
-		Publish(ctx, fmt.Sprintf("registry.mkz.me/test-ci/static-server:%s", tag))
+		WithRegistryAuth(regAddress, regUsername, regPassword).
+		Publish(ctx, fmt.Sprintf("%s/%s:%s", regAddress, imageName, tag))
 	if err != nil {
 		return "", err
 	}
