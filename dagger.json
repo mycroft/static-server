@@ -1,6 +1,16 @@
 {
   "name": "static-server",
   "sdk": "go",
+  "dependencies": [
+    {
+      "name": "golang",
+      "source": "github.com/mycroft/go-dagger-ci/golang@f039c63ee3ed83d52254673a83f508398bc422ea"
+    },
+    {
+      "name": "helloWorld",
+      "source": "github.com/mycroft/go-dagger-ci/helloWorld@3187f728717c5c634a3cdae0ae2d281e45e4ecc9"
+    }
+  ],
   "source": "ci",
   "engineVersion": "v0.11.4"
 }

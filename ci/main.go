@@ -25,42 +25,23 @@ const (
 	GO_VERSION = "1.20"
 )
 
-// Returns a container for testing & build
-func (m *StaticServer) getContainer(source *Directory) *Container {
-	return dag.Container().
-		From(fmt.Sprintf("golang:%s-alpine", GO_VERSION)).
-		WithMountedDirectory("/src", source).
-		WithWorkdir("/src").
-		WithExec([]string{"apk", "add", "curl"})
+// Use the helloWorld module to show "hello world"
+func (s *StaticServer) HelloWorld(ctx context.Context) (string, error) {
+	return dag.HelloWorld().ContainerEchoHelloWorld().Stdout(ctx)
 }
 
-// Build static-server
-func (m *StaticServer) build(source *Directory) *Container {
-	return m.getContainer(source).
-		WithExec([]string{"go", "build"})
-}
-
-// Simpl ybuild the project with go build
+// Simply build the project with go build
 func (m *StaticServer) Build(ctx context.Context, source *Directory) (string, error) {
-	return m.build(source).
+	return dag.Golang().
+		Build(GO_VERSION, source).
 		Stdout(ctx)
 }
 
-// Run tests
+// Build & run tests
 func (m *StaticServer) Test(ctx context.Context, source *Directory) (string, error) {
-	return m.getContainer(source).
-		WithExec([]string{"go", "test"}).
+	return dag.Golang().
+		Test(GO_VERSION, source).
 		Stdout(ctx)
-}
-
-// Build & test the project
-func (m *StaticServer) BuildTest(ctx context.Context, source *Directory) (string, error) {
-	_, err := m.Build(ctx, source)
-	if err != nil {
-		return "", err
-	}
-
-	return m.Test(ctx, source)
 }
 
 // Run the whole pipeline: test, build & publish
@@ -70,7 +51,7 @@ func (m *StaticServer) Publish(ctx context.Context, regUsername string, regPassw
 		return "", err
 	}
 
-	address, err := m.build(source).
+	address, err := dag.Golang().Build(GO_VERSION, source).
 		WithRegistryAuth(regAddress, regUsername, regPassword).
 		Publish(ctx, fmt.Sprintf("%s/%s:%s", regAddress, imageName, tag))
 	if err != nil {
